@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="login-container">
+    <h1 class="login-title">Welcome to the Dashboard</h1>
+    <div class="login-box">
+        <a href="{{ url_for('auth.login') }}" class="login-button">
+            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google Logo" class="google-logo">
+            Login with Google
+        </a>
+    </div>
+</div>
+{% endblock %}
