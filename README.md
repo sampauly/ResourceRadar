@@ -86,7 +86,7 @@ To enable Google authentication:
 2. Create a new project. You can do this from top left where it says **Select a Project.** If you already have a project, your project name will be in place of **Select a Project.**
 3. In **APIs & Services > Oauth consent screen** setup the details of your app. Make sure you set your **Audience** as **External**.
 4. Go to **APIs & Services > Credentials** and click on Create credentials, and create **OAuth Client ID**.
-5. Make sure the Application type is **Web Application** and the Authorized redirect URIs is set as ```bash http://127.0.0.1:8000/callback```
+5. Make sure the Application type is **Web Application** and the Authorized redirect URIs is set as ```http://127.0.0.1:8000/callback```
 6. This creates an Oauth2.0 application, which you can open to see the **Client ID** and **Client Secret**.
 7. Create a `.env` file in the project root (the base project folder) and add following credentials. Make sure you replace your-client-id and your-client-secret with the keys given by Oauth2.0.
    ```bash
