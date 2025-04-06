@@ -63,7 +63,7 @@ Ensure you have Python installed on your system. You can download it from [pytho
    ```
 3. Create a virtual environment:
    ```bash
-   /opt/bin/python3.13 -m venv venv
+   /opt/python3/bin/python3.13 -m venv venv
    source venv/bin/activate
    ```
    `/opt/bin/python3.13` is the python you have installed in your server. However, you might have python installed at another location in your own computer, so specify python accordingly.
