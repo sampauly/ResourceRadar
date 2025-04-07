@@ -7,7 +7,7 @@ Resource Radar is a Flask-based web application designed to help users efficient
 ## Project Structure
 
 ```
-resource_radar/
+cop4521-flask/
 ├── LICENSE
 ├── README.md
 ├── app
