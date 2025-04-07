@@ -68,14 +68,16 @@ Ensure you have Python installed on your system. You can download it from [pytho
    ```
    `/opt/bin/python3.13` is the python you have installed in your server. However, you might have python installed at another location in your own computer, so specify python accordingly.
 
-4. Install pip using ensurepip (if you don't have pip already installed)
+> The rest of the steps assumes your python venv has been correctly activated.
+
+4. Install pip using ensurepip (if you don't have pip already installed).
    ```bash
-   /opt/bin/python3.13 -m ensurepip
+   python3 -m ensurepip
    ```
    
 6. Install dependencies:
    ```bash
-   /opt/bin/python3.13 -m pip install -r requirements.txt
+   python -m pip install -r requirements.txt
    ```
 
 ## Setting Up Google Authentication Credentials
@@ -92,7 +94,12 @@ To enable Google authentication:
    ```bash
    GOOGLE_CLIENT_ID=your-client-id
    GOOGLE_CLIENT_SECRET=your-client-secret
+   SECRET_KEY=unique-flask-app-identifier
    ```
+> To generate the unique flask app identifier, you can do the following in the terminal. There might be other ways of doing the same.
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
+```
 
 ## Database Migrations
 
