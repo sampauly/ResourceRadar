@@ -53,13 +53,13 @@ Ensure you have Python installed on your system. You can download it from [pytho
 
 ### Installation
 
-1. Clone the repository:
+1. Fork the repository and clone it:
    ```bash
-   git clone https://github.com/yourusername/resource_radar.git
+   git clone https://gitlab.com/yourusername/cop4521-flask.git
    ```
 2. Navigate to the project directory:
    ```bash
-   cd resource_radar
+   cd cop4521-flask
    ```
 3. Create a virtual environment:
    ```bash
