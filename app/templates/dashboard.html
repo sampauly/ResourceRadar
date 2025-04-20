@@ -1,23 +1,23 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="dashboard-container">
-    <h1 class="dashboard-title">Dashboard Overview</h1>
+    <h1 class="dashboard-title">Data Retrieval Dashboard</h1>
     
     <div class="charts-container">
         <div class="chart-card">
-            <h3>Sales Distribution</h3>
+            <h3>CPU Usage</h3>
             <canvas id="pieChart"></canvas>
         </div>
         <div class="chart-card">
-            <h3>Monthly Revenue</h3>
+            <h3>Memory Usage</h3>
             <canvas id="barChart"></canvas>
         </div>
         <div class="chart-card">
-            <h3>Frequency of Orders</h3>
+            <h3>Disk Usage</h3>
             <canvas id="histogramChart"></canvas>
         </div>
         <div class="chart-card">
-            <h3>Customer Growth</h3>
+            <h3>Network Usage</h3>
             <canvas id="lineChart"></canvas>
         </div>
     </div>
