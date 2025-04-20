@@ -32,3 +32,4 @@ def logout():
     """Log out the user."""
     logout_user()
     return redirect(url_for('main.index'))
+

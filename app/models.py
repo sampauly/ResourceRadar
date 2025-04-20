@@ -23,3 +23,4 @@ class MetricLogs(db.Model):
     memory_usage = db.Column(db.Float, nullable=True)
     disk_usage = db.Column(db.Float, nullable=True)
     network_usage = db.Column(db.Float, nullable=True)
+
