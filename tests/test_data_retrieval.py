@@ -118,36 +118,36 @@ class TestDataRetrieval(unittest.TestCase):
 
         store_metrics()
 
-        # should create 4 metric logs, one per server
+        # assert 4 metric logs have been created 
         self.assertEqual(mock_metric_logs.call_count, 4)
         mock_metric_logs.assert_any_call(machine_name="server_1")
             
-        # get expected cpu data matches mock log data
+        # get expected cpu data 
         expected_cpu_usage = sum(self.cpu_data['data'][0][1:])
         
-        # get expected network data matches mock log data
+        # get expected network data 
         received = self.network_data['data'][0][1]
         sent = abs(self.network_data['data'][0][2])
         expected_network_usage = received + sent
 
-        # get expected memory usage matches mock log data
+        # get expected memory usage 
         used, cached, buffers = self.mem_data['data'][0][2:]
         expected_mem_usage = used - (cached + buffers)
 
-        # get expected disk usage matches mock log data 
+        # get expected disk usage  
         disk_total = sum(self.disk_data['data'][0][1:])
         disk_used = sum(self.disk_data['data'][0][2:])
         expected_disk_percent_used = (disk_used / disk_total) * 100
 
-        # assert expected vals equal one of the mock log instances dataset
+        # assert expected vals = corresponding mock log data
         self.assertEqual(mock_log_instances[0].network_usage, expected_network_usage)
         self.assertEqual(mock_log_instances[0].cpu_usage, expected_cpu_usage)
         self.assertEqual(mock_log_instances[0].memory_usage, expected_mem_usage)
         self.assertEqual(mock_log_instances[0].disk_usage, expected_disk_percent_used)
 
-        # check that db.session.add was called on mock database
+        # assert that db.session.add was called on mock database
         self.assertEqual(mock_db_session.add.call_count, 4)
-        # make sure commit was called once 
+        # assert commit was called once 
         mock_db_session.commit.assert_called_once()
 
 
