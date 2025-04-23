@@ -31,9 +31,10 @@ def get_data(host, chart, points=1):
     
         # get most recent data point and strip timestamp
         if data and 'data' in data and len(data['data']) > 0:
+            # return most recent data from 'data' label, stripping timestamp out
             return data['data'][-1][1:]  
         return None
-    
+  
     except Exception as e:
         logger.error(f"Error retrieving {chart} from {host}: {str(e)}")
         return None
