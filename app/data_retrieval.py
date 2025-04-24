@@ -1,7 +1,8 @@
 import logging
 import requests
 from datetime import datetime 
-from .models import db, MetricLogs
+from .models import MetricLogs, db
+from . import scheduler
 
 logger = logging.getLogger(__name__)
 
@@ -45,57 +46,60 @@ def store_metrics():
         * creates metric_log models for each server 
         * commits changes to database
     """
-    for server in servers:
-        # create metric log model for each server
-        metric_log = MetricLogs(machine_name=server['name'])
+    # calling with scheduler objcets app context 
+    # in the context of the scheduler (the flask app), perform the store metric instructions
+    with scheduler.app.app_context():
+        for server in servers[:1]:
+            # create metric log model for each server
+            metric_log = MetricLogs(machine_name=server['name'])
+            try:
+                # get total cpu usage 
+                cpu_data = get_data(server["host"], "system.cpu")
+                if cpu_data:
+                    metric_log.cpu_usage = sum(cpu_data) 
+
+                # get total network usage 
+                network_data = get_data(server["host"], "system.net")
+                if network_data:
+                    received = network_data[0]
+                    sent = abs(network_data[1])
+                    metric_log.network_usage = received + sent 
+
+                # get total memory usage, not including cached and buffers
+                memory_data = get_data(server["host"], "system.ram")
+                if memory_data:
+                    used = memory_data[1]
+                    cached = memory_data[2]
+                    buffers = memory_data[3]
+                    total_mem_used = used - (cached + buffers)
+                    metric_log.memory_usage = total_mem_used
+
+                # get disk usage as percentage, including disk space reserved for root 
+                disk_data = get_data(server["host"], "disk_space./")
+                if disk_data:
+                    disk_total = sum(disk_data)
+                    disk_used = sum(disk_data[1:])
+                    disk_percent_used = disk_used / disk_total * 100
+                    metric_log.disk_usage = disk_percent_used
+
+                # log metrics in database
+                db.session.add(metric_log)
+                logger.info(f"{server['name']} metrics collected.")
+                
+            except RuntimeError as e:
+                db.session.add(metric_log)
+                logger.error(f"Error collecting metrics for {server['name']}: {str(e)}")
+
+
+        # commit all changes
         try:
-            # get total cpu usage 
-            cpu_data = get_data(server["host"], "system.cpu")
-            if cpu_data:
-                metric_log.cpu_usage = sum(cpu_data) 
-
-            # get total network usage 
-            network_data = get_data(server["host"], "system.net")
-            if network_data:
-                received = network_data[0]
-                sent = abs(network_data[1])
-                metric_log.network_usage = received + sent 
-
-            # get total memory usage, not including cached and buffers
-            memory_data = get_data(server["host"], "system.ram")
-            if memory_data:
-                used = memory_data[1]
-                cached = memory_data[2]
-                buffers = memory_data[3]
-                total_mem_used = used - (cached + buffers)
-                metric_log.memory_usage = total_mem_used
-
-            # get disk usage as percentage, including disk space reserved for root 
-            disk_data = get_data(server["host"], "disk_space./")
-            if disk_data:
-                disk_total = sum(disk_data)
-                disk_used = sum(disk_data[1:])
-                disk_percent_used = disk_used / disk_total * 100
-                metric_log.disk_usage = disk_percent_used
-
-            # log metrics in database
-            db.session.add(metric_log)
-            logger.info(f"{server['name']} metrics collected.")
-            
+            db.session.commit()
+            logger.info(f"Server metrics saved at {datetime.now()}")
         except Exception as e:
-            db.session.add(metric_log)
-            logger.error(f"Error collecting metrics for {server['name']}: {str(e)}")
+            db.session.rollback()
+            logger.error(f"Database Error: {str(e)}")
 
 
-    # commit all changes
-    try:
-        db.session.commit()
-        logger.info(f"Server metrics saved at {datetime.now()}")
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Database Error: {str(e)}")
+                
 
-
-            
-
-            
+                

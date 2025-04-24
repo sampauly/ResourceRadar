@@ -3,7 +3,7 @@ from app.models import MetricLogs
 from unittest.mock import patch, MagicMock
 import unittest
 import json
-
+""" IS NOT WORKING WITH CURRENT DATA RETRIEVAL SETUP AFTER ADDING APP CONTEXT """
 
 class TestDataRetrieval(unittest.TestCase):
     # setUp(): get mock data in a json file 

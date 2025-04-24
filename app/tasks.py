@@ -1,5 +1,5 @@
 import logging
-from .data_retrieval import store_metrics, scheduler
+from .data_retrieval import store_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -9,7 +9,7 @@ def schedule_logging(scheduler):
         id='collect_metrics',
         func=store_metrics,
         trigger='interval',
-        minutes=1,
+        seconds=10,
         replace_existing=True
     )
     logger.info("Scheduled metrics collection job")

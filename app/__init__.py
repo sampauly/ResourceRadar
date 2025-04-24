@@ -6,7 +6,7 @@ from config import Config
 from flask_login import LoginManager
 from authlib.integrations.flask_client import OAuth
 from flask_migrate import Migrate
-from .models import db, User
+from .models import User, db
 from .routes import main_bp
 from .auth import auth_bp
 from .admin import init_admin
@@ -26,7 +26,7 @@ def create_app():
     """Create and configure the Flask app."""
     app = Flask(__name__)
     app.config.from_object(Config)
-    
+
     # Initialize extensions
     login_manager.init_app(app)
     oauth.init_app(app)
@@ -52,6 +52,7 @@ def create_app():
         # calling scheduler here once app is created 
         from .tasks import schedule_logging
         schedule_logging(scheduler)
+        # start jobs 
         scheduler.start()
 
     # Register blueprints
