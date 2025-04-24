@@ -10,4 +10,4 @@ admin = Admin()
 def init_admin(app):
     """Initialize the admin interface."""
     admin.init_app(app)
-    admin.add_view(ModelView(User, db.session))
+    admin.add_view(ModelView(User, db.session, name='Users'))

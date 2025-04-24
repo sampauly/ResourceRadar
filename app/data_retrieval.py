@@ -1,10 +1,7 @@
 import logging
 import requests
-from app.models import MetricLogs
-from app import db, create_app
 from datetime import datetime 
-from flask_apscheduler import APScheduler
-from flask import current_app
+from .models import db, MetricLogs
 
 logger = logging.getLogger(__name__)
 
@@ -14,16 +11,6 @@ servers = [
     {"name": "server_3", "host": "http://66.228.32.144:19999"},
     {"name": "server_4", "host": "http://172.104.12.189:19999"},
 ]
-
-def schedule_logging(scheduler):
-    """ configures the job being scheduled """
-    scheduler.add_job(
-        id='collect_metrics',
-        func=store_metrics,
-        trigger='interval',
-        minutes=1,
-        replace_existing=True
-    )
 
 def get_data(host, chart, points=1):
     """
@@ -59,9 +46,8 @@ def store_metrics():
         * commits changes to database
     """
     for server in servers:
-        # create metric log model for each server 
+        # create metric log model for each server
         metric_log = MetricLogs(machine_name=server['name'])
-
         try:
             # get total cpu usage 
             cpu_data = get_data(server["host"], "system.cpu")
@@ -94,11 +80,11 @@ def store_metrics():
 
             # log metrics in database
             db.session.add(metric_log)
-            logger.info(f"{server["name"]} metrics collected.")
+            logger.info(f"{server['name']} metrics collected.")
             
         except Exception as e:
             db.session.add(metric_log)
-            logger.error(f"Error collecting metrics for {server["name"]}: {str(e)}")
+            logger.error(f"Error collecting metrics for {server['name']}: {str(e)}")
 
 
     # commit all changes

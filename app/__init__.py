@@ -11,7 +11,6 @@ from .routes import main_bp
 from .auth import auth_bp
 from .admin import init_admin
 from flask_apscheduler import APScheduler
-from .data_retrieval import schedule_logging
 
 migrate = Migrate()
 login_manager = LoginManager()
@@ -36,9 +35,6 @@ def create_app():
     init_admin(app)
     scheduler.init_app(app)
 
-    # start scheduler
-    scheduler.start()
-    
     # Configure OAuth provider
     oauth.register(
         name='google',
@@ -49,13 +45,18 @@ def create_app():
         server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
         client_kwargs={'scope': 'openid email profile'}
     )
-    
+
+    # intialize scheduler
     with app.app_context():
         db.create_all()
+        # calling scheduler here once app is created 
+        from .tasks import schedule_logging
         schedule_logging(scheduler)
-    
+        scheduler.start()
+
     # Register blueprints
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
-    
+
+
     return app
