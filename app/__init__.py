@@ -10,10 +10,13 @@ from .models import db, User
 from .routes import main_bp
 from .auth import auth_bp
 from .admin import init_admin
+from flask_apscheduler import APScheduler
+from .data_retrieval import schedule_logging
 
 migrate = Migrate()
 login_manager = LoginManager()
 oauth = OAuth()
+scheduler = APScheduler()
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -31,6 +34,10 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     init_admin(app)
+    scheduler.init_app(app)
+
+    # start scheduler
+    scheduler.start()
     
     # Configure OAuth provider
     oauth.register(
@@ -45,6 +52,7 @@ def create_app():
     
     with app.app_context():
         db.create_all()
+        schedule_logging(scheduler)
     
     # Register blueprints
     app.register_blueprint(main_bp)

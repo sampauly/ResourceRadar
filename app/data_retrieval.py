@@ -1,8 +1,10 @@
 import logging
 import requests
 from app.models import MetricLogs
-from app import db
+from app import db, create_app
 from datetime import datetime 
+from flask_apscheduler import APScheduler
+from flask import current_app
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +14,16 @@ servers = [
     {"name": "server_3", "host": "http://66.228.32.144:19999"},
     {"name": "server_4", "host": "http://172.104.12.189:19999"},
 ]
+
+def schedule_logging(scheduler):
+    """ configures the job being scheduled """
+    scheduler.add_job(
+        id='collect_metrics',
+        func=store_metrics,
+        trigger='interval',
+        minutes=1,
+        replace_existing=True
+    )
 
 def get_data(host, chart, points=1):
     """
