@@ -51,6 +51,7 @@ def create_app():
         db.create_all()
         # calling scheduler here once app is created 
         from .tasks import schedule_logging
+        
         schedule_logging(scheduler)
         # start jobs 
         scheduler.start()

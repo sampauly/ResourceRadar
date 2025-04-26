@@ -9,7 +9,7 @@ def schedule_logging(scheduler):
         id='collect_metrics',
         func=store_metrics,
         trigger='interval',
-        seconds=10,
+        minutes=10,
         replace_existing=True
     )
     logger.info("Scheduled metrics collection job")

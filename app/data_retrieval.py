@@ -8,9 +8,7 @@ logger = logging.getLogger(__name__)
 
 servers = [
     {"name": "server_1", "host": "http://45.79.180.177:19999"},
-    {"name": "server_2", "host": "http://73.118.89.1:19999"},
-    {"name": "server_3", "host": "http://66.228.32.144:19999"},
-    {"name": "server_4", "host": "http://172.104.12.189:19999"},
+    {"name": "server_3", "host": "http://66.228.32.144:19999"}
 ]
 
 def get_data(host, chart, points=1):
@@ -49,7 +47,7 @@ def store_metrics():
     # calling with scheduler objcets app context 
     # in the context of the scheduler (the flask app), perform the store metric instructions
     with scheduler.app.app_context():
-        for server in servers[:1]:
+        for server in servers:
             # create metric log model for each server
             metric_log = MetricLogs(machine_name=server['name'])
             try:
