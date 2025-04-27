@@ -19,11 +19,11 @@ def callback():
     token = current_app.extensions['authlib.integrations.flask_client'].google.authorize_access_token()
     user_info = token.get('userinfo')
     email = user_info['email']
-    
+
     user = User.query.filter_by(email=email).first()
     if not user:
         return redirect(url_for('main.unauthorized'))
-    
+
     login_user(user)
     return redirect(url_for('main.dashboard'))
 
@@ -32,4 +32,3 @@ def logout():
     """Log out the user."""
     logout_user()
     return redirect(url_for('main.index'))
-

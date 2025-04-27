@@ -1,6 +1,6 @@
 import logging
 import requests
-from datetime import datetime 
+from datetime import datetime
 from .models import MetricLogs, db
 from . import scheduler
 
@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 servers = [
     {"name": "server_1", "host": "http://45.79.180.177:19999"},
-    {"name": "server_3", "host": "http://66.228.32.144:19999"}
+    {"name": "server_2", "host": "http://66.228.32.144:19999"}
 ]
 
 def get_data(host, chart, points=1):
@@ -21,22 +21,22 @@ def get_data(host, chart, points=1):
         * chart= metric to collect
         * points= default to 1, gets one data point (most recent)
     returns data 
-    """ 
+    """
     try:
         url = f"{host}/api/v1/data?chart={chart}&points={points}&format=json"
         response = requests.get(url, timeout=5)
         data = response.json()
-    
+
         # get most recent data point and strip timestamp
         if data and 'data' in data and len(data['data']) > 0:
             # return most recent data from 'data' label, stripping timestamp out
-            return data['data'][-1][1:]  
+            return data['data'][-1][1:]
         return None
-  
+
     except Exception as e:
         logger.error(f"Error retrieving {chart} from {host}: {str(e)}")
         return None
-    
+
 def store_metrics():
     """ 
     purpose: 
@@ -44,24 +44,24 @@ def store_metrics():
         * creates metric_log models for each server 
         * commits changes to database
     """
-    # calling with scheduler objcets app context 
+    # calling with scheduler objcets app context
     # in the context of the scheduler (the flask app), perform the store metric instructions
     with scheduler.app.app_context():
         for server in servers:
             # create metric log model for each server
             metric_log = MetricLogs(machine_name=server['name'])
             try:
-                # get total cpu usage 
+                # get total cpu usage
                 cpu_data = get_data(server["host"], "system.cpu")
                 if cpu_data:
-                    metric_log.cpu_usage = sum(cpu_data) 
+                    metric_log.cpu_usage = sum(cpu_data)
 
-                # get total network usage 
+                # get total network usage
                 network_data = get_data(server["host"], "system.net")
                 if network_data:
                     received = network_data[0]
                     sent = abs(network_data[1])
-                    metric_log.network_usage = received + sent 
+                    metric_log.network_usage = received + sent
 
                 # get total memory usage, not including cached and buffers
                 memory_data = get_data(server["host"], "system.ram")
@@ -72,7 +72,7 @@ def store_metrics():
                     total_mem_used = used - (cached + buffers)
                     metric_log.memory_usage = total_mem_used
 
-                # get disk usage as percentage, including disk space reserved for root 
+                # get disk usage as percentage, including disk space reserved for root
                 disk_data = get_data(server["host"], "disk_space./")
                 if disk_data:
                     disk_total = sum(disk_data)
@@ -83,7 +83,7 @@ def store_metrics():
                 # log metrics in database
                 db.session.add(metric_log)
                 logger.info(f"{server['name']} metrics collected.")
-                
+
             except RuntimeError as e:
                 db.session.add(metric_log)
                 logger.error(f"Error collecting metrics for {server['name']}: {str(e)}")
@@ -95,9 +95,4 @@ def store_metrics():
             logger.info(f"Server metrics saved at {datetime.now()}")
         except Exception as e:
             db.session.rollback()
-            logger.error(f"Database Error: {str(e)}")
-
-
-                
-
-                
+            logger.error(f"Database Error: {str(e)}")                
