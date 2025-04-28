@@ -88,3 +88,58 @@ body {
 .content-container {
     padding: 20px;
 }
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #4299e1; /* Default blue */
+    border-radius: 5px;
+}
+
+.memory-fill {
+    background-color: #48bb78; /* Green */
+}
+
+.disk-fill {
+    background-color: #ecc94b; /* Yellow */
+}
+
+.network-fill {
+    background-color: #9f7aea; /* Purple */
+}
+
+.alert-message {
+    background-color: #fef3c7;
+    border-left: 4px solid #f59e0b;
+    color: #92400e;
+    padding: 16px;
+    margin: 20px 0;
+}
+
+.refresh-container {
+    text-align: center;
+    margin-top: 24px;
+}
+
+.refresh-button {
+    display: inline-block;
+    background-color: #3b82f6;
+    color: white;
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.refresh-button:hover {
+    background-color: #2563eb;
+}
