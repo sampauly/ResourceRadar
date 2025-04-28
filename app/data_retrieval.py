@@ -12,16 +12,7 @@ servers = [
 ]
 
 def get_data(host, chart, points=1):
-    """
-    purpose: 
-        * retrieve data from the netdata api
-        * check data is not empty
-    args:
-        * host= server ip 
-        * chart= metric to collect
-        * points= default to 1, gets one data point (most recent)
-    returns data 
-    """
+    """ Get raw data from Netdata Api """
     try:
         url = f"{host}/api/v1/data?chart={chart}&points={points}&format=json"
         response = requests.get(url, timeout=5)
@@ -38,14 +29,7 @@ def get_data(host, chart, points=1):
         return None
 
 def store_metrics():
-    """ 
-    purpose: 
-        * call get_data to get specific server metrics
-        * creates metric_log models for each server 
-        * commits changes to database
-    """
-    # calling with scheduler objcets app context
-    # in the context of the scheduler (the flask app), perform the store metric instructions
+    """ Call get_data and compute specific data for each server then store to the respective MetricLog """
     with scheduler.app.app_context():
         for server in servers:
             # create metric log model for each server
@@ -84,8 +68,6 @@ def store_metrics():
                 db.session.add(metric_log)
                 logger.error(f"Error collecting metrics for {server['name']}: {str(e)}")
 
-
-        # commit all changes
         try:
             db.session.commit()
             logger.info(f"Server metrics saved at {datetime.now()}")

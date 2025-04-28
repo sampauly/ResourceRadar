@@ -4,6 +4,7 @@ Main application routes.
 from flask import Blueprint, render_template, request, flash
 from flask_login import login_required
 from .models import User, db
+from .visuals import GetMetrics
 
 main_bp = Blueprint('main', __name__)
 
