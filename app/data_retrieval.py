@@ -63,14 +63,10 @@ def store_metrics():
                     sent = abs(network_data[1])
                     metric_log.network_usage = received + sent
 
-                # get total memory usage, not including cached and buffers
+                # get used memory 
                 memory_data = get_data(server["host"], "system.ram")
                 if memory_data:
-                    used = memory_data[1]
-                    cached = memory_data[2]
-                    buffers = memory_data[3]
-                    total_mem_used = used - (cached + buffers)
-                    metric_log.memory_usage = total_mem_used
+                    metric_log.memory_usage = memory_data[1]
 
                 # get disk usage as percentage, including disk space reserved for root
                 disk_data = get_data(server["host"], "disk_space./")
