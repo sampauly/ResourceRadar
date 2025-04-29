@@ -1,9 +1,4 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // set up auto refresh every 10 minutes (600000 ms)
-    setInterval(refreshDashboard, 600000)
-
-    // display last updated time
-    updateLastUpdatedTime()
 
     var pieCtx = document.getElementById('pieChart').getContext('2d');
     var barCtx = document.getElementById('barChart').getContext('2d');
@@ -58,13 +53,3 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
-
-function refreshDashboard() {
-    // refresh the page
-    window.location.reload();
-}
-
-function updateLastUpdatedTime() {
-    const now = new Date();
-    document.getElementById('update-item').textContent = now.toLocaleTimeString();
-}

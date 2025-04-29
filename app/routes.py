@@ -18,6 +18,8 @@ def index():
 @login_required
 def dashboard():
     """Render the dashboard page."""
+    """ basic users just see the real time data
+        Admins can see real time data as well as historical data """
     return render_template('dashboard.html')
 
 @main_bp.route('/unauthorized')
