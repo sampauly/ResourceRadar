@@ -1,25 +1,30 @@
 """
 Main application routes.
 """
-from flask import Blueprint, render_template, request, flash
+from flask import Blueprint, render_template, request, flash, jsonify
 from flask_login import login_required
 from .models import User, db
 from .visuals import latest_metrics
 from datetime import datetime
 
 main_bp = Blueprint('main', __name__)
+api = Blueprint('api', __name__)
 
 @main_bp.route('/')
 def index():
     """Render the login page."""
     return render_template('login.html')
 
+@api.route('/api/current_metrics', methods=['GET'])
+def current_metrics():
+    """ get the latest metrics for each server and return as json """
+    current_metrics = latest_metrics()
+    return jsonify(current_metrics)
+
 @main_bp.route('/dashboard')
 @login_required
 def dashboard():
     """Render the dashboard page."""
-    """ basic users just see the real time data
-        Admins can see real time data as well as historical data """
     return render_template('dashboard.html')
 
 @main_bp.route('/unauthorized')

@@ -7,7 +7,7 @@ from flask_login import LoginManager
 from authlib.integrations.flask_client import OAuth
 from flask_migrate import Migrate
 from .models import User, db
-from .routes import main_bp
+from .routes import main_bp, api
 from .auth import auth_bp
 from .admin import init_admin
 from flask_apscheduler import APScheduler
@@ -59,6 +59,7 @@ def create_app():
     # Register blueprints
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(api)
 
 
     return app
