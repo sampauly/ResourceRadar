@@ -7,8 +7,8 @@
 * Network Usage: Amount of kilobits per second being sent over the network, sent and received (kbit/s)
 * Disk Usage: Percent of space used on device (percentage)
 """
-from .models import db
-from flask import jsonify 
+from .models import db, MetricLogs
+from sqlalchemy import text
 
 def get_connection():
     conn = db.engine.connect()
@@ -16,19 +16,17 @@ def get_connection():
 
 def latest_metrics():
     """ queries most recent data for both machines then returns a dictionary containing each servers data """
-    # connect db to the backend 
     conn = get_connection()
-    # query most recent data
-    query_result = conn.execute('''
+    query_result = conn.execute(text('''
         SELECT *
         FROM metric_logs
         ORDER BY id DESC
         LIMIT 2
-        ''')
- 
-    latest_metrics = [dict(row) for row in query_result.fetchall()]
-    conn.close()
+    ''')).mappings().all()
 
+    latest_metrics = [dict(row) for row in query_result]
+
+    conn.close()
     # create a dictionary for each servers data 
     server_metrics = {}
     for metric in latest_metrics:
@@ -36,13 +34,11 @@ def latest_metrics():
         # if machine not yet in server metrics, add it 
         if name not in server_metrics:
             server_metrics[name] = {
-                # need timestamp
-                'timestamp': metric['timestamp'],
                 # need cpu_usage, memory_usage, network_usage, and disk_usage
-                'cpu_usage': metric['cpu_usage'],
-                'network_usage': metric['network_usage'],
-                'disk_usage': metric['disk_usage'],
-                'memory_usage': metric['memory_usage']
+                'cpu_usage': round(metric['cpu_usage'], 2),
+                'network_usage': round(metric['network_usage'], 2),
+                'disk_usage': round(metric['disk_usage'], 2),
+                'memory_usage': round(metric['memory_usage'], 2)
             }
 
     return server_metrics

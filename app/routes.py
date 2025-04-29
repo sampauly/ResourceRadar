@@ -4,8 +4,7 @@ Main application routes.
 from flask import Blueprint, render_template, request, flash, jsonify
 from flask_login import login_required
 from .models import User, db
-from .visuals import latest_metrics
-from datetime import datetime
+from .metric_collector import latest_metrics
 
 main_bp = Blueprint('main', __name__)
 api = Blueprint('api', __name__)
@@ -18,8 +17,11 @@ def index():
 @api.route('/api/current_metrics', methods=['GET'])
 def current_metrics():
     """ get the latest metrics for each server and return as json """
-    current_metrics = latest_metrics()
-    return jsonify(current_metrics)
+    try:
+        current = latest_metrics()
+        return jsonify(current) 
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @main_bp.route('/dashboard')
 @login_required

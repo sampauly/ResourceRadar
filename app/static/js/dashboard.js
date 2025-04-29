@@ -1,55 +1,175 @@
-document.addEventListener('DOMContentLoaded', function () {
-
-    var pieCtx = document.getElementById('pieChart').getContext('2d');
-    var barCtx = document.getElementById('barChart').getContext('2d');
-    var histCtx = document.getElementById('histogramChart').getContext('2d');
-    var lineCtx = document.getElementById('lineChart').getContext('2d');
-
-    new Chart(pieCtx, {
-        type: 'pie',
-        data: {
-            labels: ['Electronics', 'Clothing', 'Grocery', 'Home Decor'],
-            datasets: [{
-                data: [30, 25, 20, 25],
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50']
-            }]
+// Wait for the DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM loaded, initializing dashboard...");
+    
+    // Get references to containers
+    const chartsContainer = document.getElementById('charts-container');
+    const errorContainer = document.getElementById('error-container');
+    
+    if (!chartsContainer) {
+        console.error("Charts container not found!");
+        return; // Exit if we can't find the container
+    }
+    
+    // Show loading message
+    chartsContainer.innerHTML = '<div class="loading">Loading metrics data...</div>';
+    
+    // Fetch current metrics data
+    fetchMetrics();
+    
+    // Function to fetch metrics data
+    function fetchMetrics() {
+        console.log("Fetching metrics data...");
+        
+        fetch('/api/current_metrics')
+            .then(response => {
+                console.log(`API response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || `Server error: ${response.status}`);
+                    });
+                }
+                
+                return response.json();
+            })
+            .then(data => {
+                console.log("Metrics data received:", data);
+                
+                // Hide any previous error
+                if (errorContainer) {
+                    errorContainer.style.display = 'none';
+                }
+                
+                // Check if data is empty
+                if (Object.keys(data).length === 0) {
+                    throw new Error("No metrics data available");
+                }
+                
+                // Create charts with the data
+                createDashboard(data);
+            })
+            .catch(error => {
+                console.error("Error fetching metrics:", error);
+                
+                // Show error message
+                if (errorContainer) {
+                    errorContainer.style.display = 'block';
+                    errorContainer.innerHTML = `
+                        <div class="alert alert-danger">
+                            <strong>Error:</strong> ${error.message}
+                        </div>
+                    `;
+                }
+                
+                // Clear loading message
+                chartsContainer.innerHTML = '';
+            });
+    }
+    
+    // Function to create the dashboard
+    function createDashboard(data) {
+        // Clear the container
+        chartsContainer.innerHTML = '';
+        
+        // Create a section for each server
+        Object.keys(data).forEach(serverName => {
+            const metrics = data[serverName];
+            
+            // Create server section
+            const serverSection = document.createElement('div');
+            serverSection.className = 'server-section';
+            
+            // Create header
+            const header = document.createElement('h2');
+            header.textContent = `Server: ${serverName}`;
+            serverSection.appendChild(header);
+            
+            // Create grid for charts
+            const chartGrid = document.createElement('div');
+            chartGrid.className = 'chart-grid';
+            
+            // Create charts for each metric
+            const metrics_data = [
+                { name: 'CPU Usage', value: metrics.cpu_usage, id: 'cpu', unit: '%' },
+                { name: 'Memory Usage', value: metrics.memory_usage, id: 'memory', unit: ' MiB' },
+                { name: 'Disk Usage', value: metrics.disk_usage, id: 'disk', unit: '%' },
+                { name: 'Network Usage', value: metrics.network_usage, id: 'network', unit: ' kbit/s' }
+            ];
+            
+            metrics_data.forEach(metric => {
+                const chartContainer = document.createElement('div');
+                chartContainer.className = 'chart-container';
+                
+                const canvas = document.createElement('canvas');
+                canvas.id = `${serverName}-${metric.id}-chart`;
+                chartContainer.appendChild(canvas);
+                
+                const label = document.createElement('div');
+                label.className = 'chart-label';
+                label.textContent = `${metric.name}: ${metric.value}${metric.unit}`;
+                chartContainer.appendChild(label);
+                
+                chartGrid.appendChild(chartContainer);
+                
+                // Schedule chart creation (to ensure canvas is in DOM)
+                setTimeout(() => {
+                    createGaugeChart(canvas.id, metric.value);
+                }, 0);
+            });
+            
+            serverSection.appendChild(chartGrid);
+            chartsContainer.appendChild(serverSection);
+        });
+    }
+    
+    // Function to create a gauge chart
+    function createGaugeChart(canvasId, value) {
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) {
+            console.error(`Canvas element ${canvasId} not found`);
+            return;
         }
-    });
-
-    new Chart(barCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-            datasets: [{
-                label: 'Revenue ($)',
-                data: [5000, 7000, 8000, 6000, 9000],
-                backgroundColor: '#36A2EB'
-            }]
+        
+        // Ensure value is a number and between 0-100
+        const numValue = parseFloat(value);
+        const safeValue = isNaN(numValue) ? 0 : Math.min(Math.max(numValue, 0), 100);
+        
+        // Choose color based on value
+        let color;
+        if (safeValue > 80) {
+            color = 'rgba(255, 99, 132, 0.8)'; // Red for high
+        } else if (safeValue > 60) {
+            color = 'rgba(255, 205, 86, 0.8)'; // Yellow for medium
+        } else {
+            color = 'rgba(75, 192, 192, 0.8)'; // Green for low
         }
-    });
-
-    new Chart(histCtx, {
-        type: 'bar',
-        data: {
-            labels: ['0-10', '10-20', '20-30', '30-40', '40+'],
-            datasets: [{
-                label: 'Orders',
-                data: [15, 25, 30, 20, 10],
-                backgroundColor: '#FFCE56'
-            }]
-        }
-    });
-
-    new Chart(lineCtx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-            datasets: [{
-                label: 'Customers',
-                data: [100, 200, 300, 400, 500],
-                borderColor: '#FF6384',
-                fill: false
-            }]
-        }
-    });
+        
+        // Create chart
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [safeValue, 100 - safeValue],
+                    backgroundColor: [color, 'rgba(220, 220, 220, 0.3)'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                cutout: '70%',
+                circumference: 180,
+                rotation: -90,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+    }
 });

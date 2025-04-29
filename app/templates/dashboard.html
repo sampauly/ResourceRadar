@@ -1,25 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="dashboard-container">
-    <h1 class="dashboard-title">Data Retrieval Dashboard</h1>
+    <!-- Add an error message container -->
+    <div id="error-container" class="error-container" style="display: none;"></div>
     
-    <div class="charts-container">
-        <div class="chart-card">
-            <h3>CPU Usage</h3>
-            <canvas id="pieChart"></canvas>
-        </div>
-        <div class="chart-card">
-            <h3>Memory Usage</h3>
-            <canvas id="barChart"></canvas>
-        </div>
-        <div class="chart-card">
-            <h3>Disk Usage</h3>
-            <canvas id="histogramChart"></canvas>
-        </div>
-        <div class="chart-card">
-            <h3>Network Usage</h3>
-            <canvas id="lineChart"></canvas>
-        </div>
+    <h1 class="dashboard-title">Data Retrieval Dashboard</h1>
+    <!-- This is where the charts will be displayed -->
+    <div id="charts-container" class="charts-container">
+        <div class="loading">Loading metrics data...</div>
     </div>
 </div>
 
