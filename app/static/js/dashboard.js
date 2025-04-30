@@ -82,7 +82,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Create header
             const header = document.createElement('h2');
-            header.textContent = `Server: ${serverName}`;
+            const serverIndex = Object.keys(data).indexOf(serverName) + 1;
+            header.textContent = `Server ${serverIndex}`;
             serverSection.appendChild(header);
             
             // Create grid for charts
@@ -93,8 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const metrics_data = [
                 { name: 'CPU Usage', value: metrics.cpu_usage, id: 'cpu', unit: '%' },
                 { name: 'Disk Usage', value: metrics.disk_usage, id: 'disk', unit: '%' },
-                { name: 'Memory Usage', value: metrics.memory_usage, id: 'memory', unit: ' MiB' },
-                { name: 'Network Usage', value: metrics.network_usage, id: 'network', unit: ' kbit/s' }
+                { name: 'Memory Usage', value: metrics.memory_usage, id: 'memory', unit: '%' },
             ];
             
             metrics_data.forEach(metric => {
@@ -117,6 +117,32 @@ document.addEventListener('DOMContentLoaded', function() {
                     createGaugeChart(canvas.id, metric.value);
                 }, 0);
             });
+
+            if (metrics.network_sent !== undefined && metrics.network_received !== undefined) {
+                const chartContainer = document.createElement('div');
+                chartContainer.className = 'chart-container';
+            
+                const canvas = document.createElement('canvas');
+                const barChartId = `${serverName}-network-bar-chart`;
+                canvas.id = barChartId;
+                chartContainer.appendChild(canvas);
+
+                canvas.id = barChartId;
+                canvas.classList.add('bar-chart'); // optional class for CSS targeting
+                canvas.height = 250; // Adjust height to match gauge chart
+                chartContainer.appendChild(canvas);
+            
+                const label = document.createElement('div');
+                label.className = 'chart-label';
+                label.textContent = `Network Sent: ${metrics.network_sent} kbit/s\n Network Received: ${metrics.network_received} kbit/s`;
+                chartContainer.appendChild(label);
+            
+                chartGrid.appendChild(chartContainer);
+            
+                setTimeout(() => {
+                    createBarChart(barChartId, metrics.network_sent, metrics.network_received);
+                }, 0);
+            }
             
             serverSection.appendChild(chartGrid);
             chartsContainer.appendChild(serverSection);
@@ -135,16 +161,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const numValue = parseFloat(value);
         const safeValue = isNaN(numValue) ? 0 : Math.min(Math.max(numValue, 0), 100);
         
-        // Choose color based on value
         let color;
         if (safeValue > 80) {
-            color = 'rgba(255, 99, 132, 0.8)'; // Red for high
+            color = '#e74c3c'; // Bright Red
         } else if (safeValue > 60) {
-            color = 'rgba(255, 205, 86, 0.8)'; // Yellow for medium
+            color = '#f39c12'; // Orange
+        } else if (safeValue > 40) {
+            color = '#27ae60'; // Emerald
         } else {
-            color = 'rgba(75, 192, 192, 0.8)'; // Green for low
+            color = '#3498db'; // Blue
         }
-        
         // Create chart
         new Chart(ctx, {
             type: 'doughnut',
@@ -168,8 +194,76 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 },
                 responsive: true,
+                maintainAspectRatio: true,
+                plugins: [{
+                    id: 'center-text',
+                    beforeDraw: chart => {
+                        const ctx = chart.ctx;
+                        const width = chart.width;
+                        const height = chart.height;
+                        ctx.restore();
+                        const fontSize = (height / 114).toFixed(2);
+                        ctx.font = fontSize + "em sans-serif";
+                        ctx.textBaseline = "middle";
+                        const text = `${safeValue.toFixed(0)}%`;
+                        const textX = Math.round((width - ctx.measureText(text).width) / 2);
+                        const textY = height / 1.6;
+                        ctx.fillText(text, textX, textY);
+                        ctx.save();
+                    }
+                }]
+            }
+        });
+    }
+
+    function createBarChart(canvasId, sent, received) {
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) {
+            console.error(`Canvas element ${canvasId} not found`);
+            return;
+        }
+    
+        const safeSent = isNaN(parseFloat(sent)) ? 0 : parseFloat(sent);
+        const safeReceived = isNaN(parseFloat(received)) ? 0 : parseFloat(received);
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Sent', 'Received'],
+                datasets: [{
+                    label: 'Network Traffic (kbit/s)',
+                    data: [safeSent, safeReceived],
+                    backgroundColor: ['#2980b9', '#d35400'], // Blue & Orange
+                    borderRadius: 4,
+                    borderSkipped: false,
+                    barThickness: 40,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: Math.max(10, Math.ceil(Math.max(safeSent, safeReceived) / 4))
+                        },
+                        title: {
+                            display: true,
+                            text: 'kbit/s'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                },
+                responsive: true,
                 maintainAspectRatio: true
             }
         });
     }
+    
 });
