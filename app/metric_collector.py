@@ -36,7 +36,8 @@ def latest_metrics():
             server_metrics[name] = {
                 # need cpu_usage, memory_usage, network_usage, and disk_usage
                 'cpu_usage': round(metric['cpu_usage'], 2),
-                'network_usage': round(metric['network_usage'], 2),
+                'network_received': round(metric['network_received'], 2),
+                'network_sent': round(metric['network_sent'], 2),
                 'disk_usage': round(metric['disk_usage'], 2),
                 'memory_usage': round(metric['memory_usage'], 2)
             }

@@ -19,8 +19,9 @@ class MetricLogs(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
     machine_name = db.Column(db.String(45), nullable=False)
-    cpu_usage = db.Column(db.Float, nullable=True)
-    memory_usage = db.Column(db.Float, nullable=True)
-    disk_usage = db.Column(db.Float, nullable=True)
-    network_usage = db.Column(db.Float, nullable=True)
+    cpu_usage = db.Column(db.Float, nullable=True) 
+    memory_usage = db.Column(db.Float, nullable=True) 
+    disk_usage = db.Column(db.Float, nullable=True) 
+    network_received = db.Column(db.Float, nullable=True)
+    network_sent = db.Column(db.Float, nullable=True)
 

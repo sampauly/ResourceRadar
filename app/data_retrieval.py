@@ -12,7 +12,7 @@ servers = [
 ]
 
 def get_data(host, chart, points=1):
-    """ Get raw data from Netdata Api """
+    """ Get raw data from Netdata Api and cleans it """
     try:
         url = f"{host}/api/v1/data?chart={chart}&points={points}&format=json"
         response = requests.get(url, timeout=5)
@@ -40,17 +40,21 @@ def store_metrics():
                 if cpu_data:
                     metric_log.cpu_usage = sum(cpu_data)
 
-                # get total network usage
+                # get network usage, sent and received 
                 network_data = get_data(server["host"], "system.net")
                 if network_data:
                     received = network_data[0]
                     sent = abs(network_data[1])
-                    metric_log.network_usage = received + sent
+                    metric_log.network_received = received
+                    metric_log.network_sent = sent 
 
-                # get used memory 
+                # get memory usage as percentage, including cache and buffers 
                 memory_data = get_data(server["host"], "system.ram")
                 if memory_data:
-                    metric_log.memory_usage = memory_data[1]
+                    used = sum(memory_data[1:])
+                    total = sum(memory_data)
+                    memory_percent_used = used / total * 100
+                    metric_log.memory_usage = memory_percent_used
 
                 # get disk usage as percentage, including disk space reserved for root
                 disk_data = get_data(server["host"], "disk_space./")

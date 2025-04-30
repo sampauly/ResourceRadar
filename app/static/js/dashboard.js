@@ -92,8 +92,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Create charts for each metric
             const metrics_data = [
                 { name: 'CPU Usage', value: metrics.cpu_usage, id: 'cpu', unit: '%' },
-                { name: 'Memory Usage', value: metrics.memory_usage, id: 'memory', unit: ' MiB' },
                 { name: 'Disk Usage', value: metrics.disk_usage, id: 'disk', unit: '%' },
+                { name: 'Memory Usage', value: metrics.memory_usage, id: 'memory', unit: ' MiB' },
                 { name: 'Network Usage', value: metrics.network_usage, id: 'network', unit: ' kbit/s' }
             ];
             
