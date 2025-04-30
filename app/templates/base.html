@@ -12,11 +12,13 @@
         <div class="nav-container">
             <a href="{{ url_for('main.dashboard') }}" class="nav-logo">Dashboard</a>
             <div class="nav-links">
+                <a href="{{ url_for('main.historical_data_page') }}">Historical Data</a>
                 <a href="{{ url_for('main.manage_users') }}">Manage Users</a>
                 <a href="{{ url_for('auth.logout') }}">Logout</a>
             </div>
         </div>
     </nav>
     <div class="content-container">{% block content %}{% endblock %}</div>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

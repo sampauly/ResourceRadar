@@ -7,8 +7,9 @@
 * Network Usage: Amount of kilobits per second being sent over the network, sent and received (kbit/s)
 * Disk Usage: Percent of space used on device (percentage)
 """
-from .models import db, MetricLogs
+from .models import db
 from sqlalchemy import text
+from datetime import datetime 
 
 def get_connection():
     conn = db.engine.connect()
@@ -44,3 +45,58 @@ def latest_metrics():
 
     return server_metrics
 
+def historical_metrics(metric_type: str, server_id: str, start_time: datetime, end_time: datetime) -> dict:
+    """ allow custom querying over timespans and returns dict containing the relevant values """
+    conn = get_connection()
+    # map corresponding metric types
+    metric_map = {
+        'cpu': 'cpu_usage',
+        'memory': 'memory_usage',
+        'disk': 'disk_usage',
+        'network': ['network_received', 'network_sent']
+    }
+
+    # validate metric_type
+    if metric_type not in metric_map:
+        raise ValueError(f"Invalid metric type: {metric_type}")
+
+    # now get correct SQL queries
+    if metric_type == 'network':
+        query = text(f'''
+            SELECT timestamp, network_received, network_sent
+            FROM metric_logs
+            WHERE machine_name = :server_id
+            AND timestamp BETWEEN :start_time AND :end_time
+            ORDER BY timestamp
+        ''')
+    else:
+        metric = metric_map[metric_type]
+        query = text(f'''
+            SELECT timestamp, {metric}
+            FROM metric_logs
+            WHERE machine_name = :server_id
+            AND timestamp BETWEEN :start_time AND :end_time
+            ORDER BY timestamp
+        ''')
+
+    # execute query
+    result = conn.execute(query, {
+        'server_id': server_id,
+        'start_time': start_time,
+        'end_time': end_time 
+    }).mappings().all()
+
+    conn.close()
+
+    # structure output
+    if metric_type == 'network':
+        return {
+            'timestamps': [row['timestamp'] for row in result],
+            'sent': [row['network_sent'] if row['network_sent'] is not None else 0 for row in result],
+            'received': [row['network_received'] if row['network_received'] is not None else 0 for row in result]
+        }
+    else:
+        return {
+            'timestamps': [row['timestamp']for row in result],
+            'values': [round(row[metric_map[metric_type]], 2) if row[metric_map[metric_type]] is not None else 0 for row in result]
+        }

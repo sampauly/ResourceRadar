@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Historical Data{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Historical Metrics</h1>
+    
+    <div class="card">
+        <div class="card-body">
+            <form id="historical-form">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="metric-type" class="form-label">Metric Type</label>
+                        <select class="form-select" id="metric-type">
+                            <option value="cpu">CPU Usage</option>
+                            <option value="memory">Memory Usage</option>
+                            <option value="disk">Disk Usage</option>
+                            <option value="network">Network Traffic</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="server-id" class="form-label">Server</label>
+                        <select class="form-select" id="server-id">
+                            <!-- Will be populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="start-time" class="form-label">Start Time</label>
+                        <input type="datetime-local" class="form-control" id="start-time">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="end-time" class="form-label">End Time</label>
+                        <input type="datetime-local" class="form-control" id="end-time">
+                    </div>
+                </div>
+                <div class="d-grid">
+                    <button type="button" id="fetch-btn" class="btn btn-primary">Fetch Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="error-container" class="alert alert-danger mt-3" style="display: none;"></div>
+    
+    <div id="loading-container" class="text-center mt-3" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p>Loading data...</p>
+    </div>
+    
+    <div class="card mt-3">
+        <div class="card-body">
+            <div style="height: 400px;">
+                <canvas id="historical-chart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="{{ url_for('static', filename='js/historical_data.js') }}"></script>
+{% endblock %}

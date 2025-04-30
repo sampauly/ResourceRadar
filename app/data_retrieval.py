@@ -48,10 +48,10 @@ def store_metrics():
                     metric_log.network_received = received
                     metric_log.network_sent = sent 
 
-                # get memory usage as percentage, including cache and buffers 
+                # get memory usage as percentage, excluding cache and buffers 
                 memory_data = get_data(server["host"], "system.ram")
                 if memory_data:
-                    used = sum(memory_data[1:])
+                    used = memory_data[1]
                     total = sum(memory_data)
                     memory_percent_used = used / total * 100
                     metric_log.memory_usage = memory_percent_used
