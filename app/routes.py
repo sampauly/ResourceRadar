@@ -5,6 +5,7 @@ from flask import Blueprint, render_template, request, flash, jsonify
 from flask_login import login_required
 from .models import User, db
 from .metric_collector import latest_metrics, historical_metrics
+from .admin import is_admin
 from datetime import datetime 
 
 main_bp = Blueprint('main', __name__)
@@ -23,6 +24,7 @@ def dashboard():
 
 @main_bp.route('/historical_data')
 @login_required
+@is_admin
 def historical_data_page():
     """Render the historical data page."""
     return render_template('historical_data.html')
@@ -34,6 +36,7 @@ def unauthorized():
 
 @main_bp.route('/manage_users', methods=['GET', 'POST'])
 @login_required
+@is_admin
 def manage_users():
     """Manage user roles."""
     if request.method == 'POST':

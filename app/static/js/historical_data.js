@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let chartInstance = null;
 
-    // Hardcoded servers - consider replacing with API call
     const servers = [
         { id: 'server_1', name: 'Server 1' },
         { id: 'server_2', name: 'Server 2' },
