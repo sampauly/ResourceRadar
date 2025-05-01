@@ -2,161 +2,135 @@
 
 ## Overview
 
-Resource Radar is a Flask-based web application designed to help users efficiently manage and track resources. It supports user authentication via Google OAuth and provides an admin panel for managing users. This guide is designed for beginners, particularly undergraduate students, and explains each module in detail.
+Resource Radar is a Flask-based web application designed to monitor and visualize real-time metrics for distributed systems. It supports user authentication via Google OAuth, provides role-based access control (RBAC), and includes an admin panel for user management.
+
+## Features
+
+- **Real-time Monitoring**: Visualizes system metrics for distributed systems
+- **Historical Data**: Admin-only access to historical performance metrics
+- **User Management**: Administrative interface for managing users
+- **Authentication**: Secure login via Google OAuth
+- **Role-Based Access Control**: Different permission levels for various users
+- **Data Visualization**: Interactive charts for metric display
 
 ## Project Structure
 
 ```
-cop4521-flask/
-├── LICENSE
-├── README.md
-├── app
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── auth.py
-│   ├── models.py
-│   ├── routes.py
-│   ├── static/
-│   │   ├── css/style.css
-│   │   └── js/dashboard.js
-│   └── templates/
-│       ├── base.html
-│       ├── dashboard.html
-│       ├── login.html
-│       ├── manage_users.html
-│       └── unauthorized.html
-├── config.py
-├── pyproject.toml
-├── requirements.txt
-├── run.py
+.
+├── app/                      # Contains the main application code
+│   ├── __init__.py           # Initializes the Flask app, sets up extensions, and registers blueprints
+│   ├── admin.py              # Configures Flask-Admin for user management
+│   ├── auth.py               # Handles user authentication via Google OAuth
+│   ├── data_retrieval.py     # Manages data collection from systems
+│   ├── metric_collector.py   # Collects system metrics
+│   ├── models.py             # Defines the database schema, including the User model
+│   ├── routes.py             # Defines the main application routes
+│   ├── tasks.py              # Handles background tasks for data collection
+│   ├── static/               # Contains static files (CSS, JavaScript)
+│   └── templates/            # Contains HTML templates
+├── config.py                 # Stores configuration settings
+└── requirements.txt          # Lists project dependencies
 ```
-
-## Files and Directories
-
-- `app`: Contains the main application code.
-  - `__init__.py`: Initializes the Flask app, sets up extensions, and registers blueprints.
-  - `admin.py`: Configures Flask-Admin, which provides an admin interface for managing users.
-  - `auth.py`: Handles user authentication via Google OAuth, including login and logout routes.
-  - `models.py`: Defines the database schema, including the `User` model.
-  - `routes.py`: Defines the main application routes, such as the dashboard and user management views.
-  - `static/`: Contains static files such as CSS and JavaScript for styling and interactivity.
-  - `templates/`: Contains HTML templates used to render pages dynamically.
-- `config.py`: Stores configuration settings such as database URI and authentication credentials.
-- `requirements.txt`: Lists the dependencies required to run the project.
-- `run.py`: Entry point for running the Flask application.
 
 ## Getting Started
 
 ### Prerequisites
 
-Ensure you have Python installed on your system. You can download it from [python.org](https://www.python.org/).
+- Python 3.8+ installed on your system
+- SQLite for the database (pre-installed with Python)
+- Web browser with JavaScript enabled
 
 ### Installation
 
-1. Fork the repository and clone it:
+1. Fork and clone the repository:
    ```bash
-   git clone https://gitlab.com/yourusername/cop4521-flask.git
-   ```
-2. Navigate to the project directory:
-   ```bash
+   git clone https://gitlab.com/sampauly/cop4521-flask.git
    cd cop4521-flask
    ```
-3. Create a virtual environment:
-   ```bash
-   /opt/python3/bin/python3.13 -m venv venv
-   source venv/bin/activate
-   ```
-   `/opt/bin/python3.13` is the python you have installed in your server. However, you might have python installed at another location in your own computer, so specify python accordingly.
 
-> The rest of the steps assumes your python venv has been correctly activated.
-
-4. Install pip using ensurepip (if you don't have pip already installed).
+2. Create a virtual environment:
    ```bash
-   python3 -m ensurepip
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
-   
-6. Install dependencies:
+   > **Note**: Use the path to your Python installation if different
+
+3. Install dependencies:
    ```bash
    python -m pip install -r requirements.txt
    ```
 
-## Setting Up Google Authentication Credentials
+### Setting Up Google Authentication
 
-To enable Google authentication:
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a new project. You can do this from top left where it says **Select a Project.** If you already have a project, your project name will be in place of **Select a Project.**
-3. In **APIs & Services > Oauth consent screen** setup the details of your app. Make sure you set your **Audience** as **External**.
-4. Go to **APIs & Services > Credentials** and click on Create credentials, and create **OAuth Client ID**.
-5. Make sure the Application type is **Web Application** and the Authorized redirect URIs is set as ```http://127.0.0.1:8000/callback```
-6. This creates an Oauth2.0 application, which you can open to see the **Client ID** and **Client Secret**.
-7. Create a `.env` file in the project root (the base project folder) and add following credentials. Make sure you replace your-client-id and your-client-secret with the keys given by Oauth2.0.
-   ```bash
+1. Go to Google Cloud Console and create a new project
+2. In **APIs & Services > OAuth consent screen**, set up your app with **External** audience
+3. Go to **APIs & Services > Credentials** and create a new **OAuth Client ID**
+4. Set Application type as **Web Application** and add `http://127.0.0.1:8000/callback` as an Authorized redirect URI
+5. Create a `.env` file in the project root with:
+   ```
    GOOGLE_CLIENT_ID=your-client-id
    GOOGLE_CLIENT_SECRET=your-client-secret
    SECRET_KEY=unique-flask-app-identifier
    ```
-> To generate the unique flask app identifier, you can do the following in the terminal. There might be other ways of doing the same.
+6. Generate a secure SECRET_KEY with:
+   ```bash
+   python -c "import secrets; print(secrets.token_hex(32))"
+   ```
+
+### Database Setup
+
+Initialize and apply database migrations:
 ```bash
-python -c "import secrets; print(secrets.token_hex(32))"
+flask db init
+flask db migrate -m "Initial migration" 
+flask db upgrade
 ```
 
-## Database Migrations
+## Running the Application
 
-Since the project uses Flask-Migrate, you need to initialize and apply database migrations when making changes to the schema.
-
-1. Initialize migrations (only needed the first time):
-   ```bash
-   flask db init
-   ```
-2. Generate a migration script whenever the database schema changes:
-   ```bash
-   flask db migrate -m "Describe changes here"
-   ```
-3. Apply the migration to update the database:
-   ```bash
-   flask db upgrade
-   ```
-
-## Usage
-
-To run the application, execute:
-
+To run the application with Gunicorn:
 ```bash
-python run.py
+gunicorn --workers 1 --bind unix:/run/flask.sock "app()"
 ```
-Open the link shown in the terminal (usually http://127.0.0.1:8000) to see your Flask app.
-If it's running on a different port (e.g. http://localhost:5000), make sure your callback URL matches it, like http://localhost:5000/callback.
 
-Also, add https://yourwebsite.me/callback to the callback list so it works online too.
+For development purposes:
+```bash
+flask run --debug
+```
+
+## Background Services
+
+The application runs background tasks that:
+- Collect system metrics every 10 minutes
+- Log data to the SQLite database
+
+## Accessing the Application
+
+- **Dashboard**: Available to all authenticated users
+- **Historical Data**: Available to admin users only
+- **User Management**: Available to admin users only
 
 ## Managing Users via Flask Shell
-Now you’ll see a Login with Google button.
-If you log in, you’ll probably get an Unauthorized message.
-That’s because your app doesn’t know who you are yet—your email isn’t in the database.
 
-To manually add a user to the database, in your terminal:
+When you first launch the application, you'll see a "Login with Google" button. After logging in, you may receive an "Unauthorized" message because your email isn't recognized in the database yet.
+
+To manually add the first admin user:
 
 1. Open the Flask shell:
    ```bash
    flask shell
    ```
+
 2. Import the necessary modules:
    ```python
    from app.models import db, User
    ```
+
 3. Create and add a user:
    ```python
    user = User(username="new_username", email="youremail@gmail.com", type="Admin")
    db.session.add(user)
    db.session.commit()
    ```
-Once your email is added, Google verifies you, and the app lets you in as admin.
-To add more users, just use the Manage Users link in the app.
-## License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
-
-## Contact
-
-For questions or suggestions, open an issue or contact the project maintainer at [prms.regmi@gmail.com](mailto\:prms.regmi@gmail.com).
+Once your email is added, Google authentication will verify you, and the app will grant you admin access. To add more users, you can use the "Manage Users" link within the application.
