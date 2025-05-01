@@ -4,12 +4,12 @@
 
 * Memory Usage: Total MiB of processes/information RAM is holding (MiB - mebibytes)
 * CPU Usage: Total percent of processing power being utilized (percentage)
-* Network Usage: Amount of kilobits per second being sent over the network, sent and received (kbit/s)
+* Network Usage: Amount of kilobits per second being sent over the network,sent and recived (kbit/s)
 * Disk Usage: Percent of space used on device (percentage)
 """
 from .models import db
 from sqlalchemy import text
-from datetime import datetime 
+from datetime import datetime
 
 def get_connection():
     conn = db.engine.connect()
@@ -28,11 +28,11 @@ def latest_metrics():
     latest_metrics = [dict(row) for row in query_result]
 
     conn.close()
-    # create a dictionary for each servers data 
+    # create a dictionary for each servers data
     server_metrics = {}
     for metric in latest_metrics:
         name = metric['machine_name']
-        # if machine not yet in server metrics, add it 
+        # if machine not yet in server metrics, add it
         if name not in server_metrics:
             server_metrics[name] = {
                 # need cpu_usage, memory_usage, network_usage, and disk_usage

@@ -1,12 +1,12 @@
 """
 Initialize Flask-Admin and configure models.
 """
+from functools import wraps
 from flask_admin import Admin
-from flask_login import current_user
 from flask_admin.contrib.sqla import ModelView
+from flask_login import current_user
 from flask import redirect, url_for
 from .models import db, User
-from functools import wraps
 
 admin = Admin()
 
@@ -23,4 +23,3 @@ def is_admin(f):
         else:
             return redirect(url_for('main.unauthorized'))
     return decorated_function
-    

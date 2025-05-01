@@ -29,7 +29,10 @@ def get_data(host, chart, points=1):
         return None
 
 def store_metrics():
-    """ Call get_data and compute specific data for each server then store to the respective MetricLog """
+    """
+    * Call get_data and compute specific metrics for each server
+    * Then store to the respective MetricLog
+    """
     with scheduler.app.app_context():
         for server in servers:
             # create metric log model for each server

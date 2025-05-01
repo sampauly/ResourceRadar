@@ -2,8 +2,7 @@ from app.data_retrieval import get_data, store_metrics
 from app.models import MetricLogs
 from unittest.mock import patch, MagicMock
 import unittest
-import json
-""" IS NOT WORKING WITH CURRENT DATA RETRIEVAL SETUP AFTER ADDING APP CONTEXT """
+
 
 class TestDataRetrieval(unittest.TestCase):
     # setUp(): get mock data in a json file 
@@ -71,10 +70,10 @@ class TestDataRetrieval(unittest.TestCase):
         mock_get.assert_called_with(expected_url, timeout=5)
     
     ## store_metrics() test
-    @patch('app.data_retrieval.MetricLogs')
+    @patch('app.data_retrieval.scheduler.app.app_context')
     @patch('app.data_retrieval.db.session')
     @patch('app.data_retrieval.get_data')
-    def test_store_metrics(self, mock_get_data, mock_db_session, mock_metric_logs):
+    def test_store_metrics(self, mock_get_data, mock_db_session, mock_app_context):
         """
         Tests:
             * correct arithmetic is being done on data 
@@ -88,22 +87,10 @@ class TestDataRetrieval(unittest.TestCase):
         Mocking:
             * get_data function
             * db.session
-            * metric_logs 
+            * app_context
         """
-        def mock_get_data_side_effect(host, chart, points=1):
-            # configure mock get_data return data for different charts
-            if chart == "system.cpu":
-                return self.cpu_data['data'][0][1:]
-            elif chart == "system.net":
-                return self.network_data['data'][0][1:]
-            elif chart == "system.ram":
-                return self.mem_data['data'][0][1:]
-            elif chart == "disk_space./":
-                return self.disk_data['data'][0][1:]
-            return None
-        
-        # the mocked get_data functions side effect (ret val) is now set to mock_get_data_side_effect
-        mock_get_data.side_effect = mock_get_data_side_effect
+        mock_context = MagicMock()
+        mock_app_context.return_value.__enter__.return_value = mock_context 
 
         # list to capture all created MetricLogs instances
         mock_log_instances = []
@@ -114,40 +101,55 @@ class TestDataRetrieval(unittest.TestCase):
             mock_log_instances.append(mock)
             return mock
         
-        mock_metric_logs.side_effect = create_mock_log
+        with patch('app.data_retrieval.MetricLogs', side_effect=create_mock_log):
+        # configure mock_get_data to return different values based on chart parameter
+            def mock_get_data_side_effect(host, chart, points=1):
+                if chart == "system.cpu":
+                    return self.cpu_data['data'][0][1:]
+                elif chart == "system.net":
+                    return self.network_data['data'][0][1:]
+                elif chart == "system.ram":
+                    return self.mem_data['data'][0][1:]
+                elif chart == "disk_space./":
+                    return self.disk_data['data'][0][1:]
+                return None
+            
+        
+        mock_get_data.side_effect = mock_get_data_side_effect
 
         store_metrics()
 
-        # assert 4 metric logs have been created 
-        self.assertEqual(mock_metric_logs.call_count, 4)
-        mock_metric_logs.assert_any_call(machine_name="server_1")
-            
-        # get expected cpu data 
-        expected_cpu_usage = sum(self.cpu_data['data'][0][1:])
+        # check that appropriate metric logs were created for each server
+        self.assertEqual(len(mock_log_instances), 2)
+        self.assertEqual(mock_log_instances[0].machine_name, "server_1")
+        self.assertEqual(mock_log_instances[1].machine_name, "server_2")
         
-        # get expected network data 
-        received = self.network_data['data'][0][1]
-        sent = abs(self.network_data['data'][0][2])
-        expected_network_usage = received + sent
-
-        # get expected memory usage 
-        used, cached, buffers = self.mem_data['data'][0][2:]
-        expected_mem_usage = used - (cached + buffers)
-
-        # get expected disk usage  
-        disk_total = sum(self.disk_data['data'][0][1:])
-        disk_used = sum(self.disk_data['data'][0][2:])
-        expected_disk_percent_used = (disk_used / disk_total) * 100
-
-        # assert expected vals = corresponding mock log data
-        self.assertEqual(mock_log_instances[0].network_usage, expected_network_usage)
+        # Test CPU Usage calculation
+        expected_cpu_usage = sum(self.cpu_data['data'][0][1:])
         self.assertEqual(mock_log_instances[0].cpu_usage, expected_cpu_usage)
-        self.assertEqual(mock_log_instances[0].memory_usage, expected_mem_usage)
-        self.assertEqual(mock_log_instances[0].disk_usage, expected_disk_percent_used)
-
-        # assert that db.session.add was called on mock database
-        self.assertEqual(mock_db_session.add.call_count, 4)
-        # assert commit was called once 
+        
+        # Test Network metrics
+        expected_received = self.network_data['data'][0][1] 
+        expected_sent = abs(self.network_data['data'][0][2]) 
+        self.assertEqual(mock_log_instances[0].network_received, expected_received)
+        self.assertEqual(mock_log_instances[0].network_sent, expected_sent)
+        
+        # Test Memory Usage calculation
+        used = self.mem_data['data'][0][2]  
+        total = sum(self.mem_data['data'][0][1:])  
+        expected_memory_percent = (used / total) * 100
+        self.assertAlmostEqual(mock_log_instances[0].memory_usage, expected_memory_percent, places=2)
+        
+        # Test Disk Usage calculation
+        disk_total = sum(self.disk_data['data'][0][1:])  
+        disk_used = sum(self.disk_data['data'][0][2:])  
+        expected_disk_percent = (disk_used / disk_total) * 100 
+        self.assertAlmostEqual(mock_log_instances[0].disk_usage, expected_disk_percent, places=2)
+        
+        # Check that db.session.add was called twice, once for each serevr 
+        self.assertEqual(mock_db_session.add.call_count, 2)
+        
+        # Ensure commit was called 
         mock_db_session.commit.assert_called_once()
 
 

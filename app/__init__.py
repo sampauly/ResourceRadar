@@ -49,11 +49,11 @@ def create_app():
     # intialize scheduler
     with app.app_context():
         db.create_all()
-        # calling scheduler here once app is created 
+        # calling scheduler here once app is created
         from .tasks import schedule_logging
-        
+
         schedule_logging(scheduler)
-        # start jobs 
+        # start jobs
         scheduler.start()
 
     # Register blueprints
