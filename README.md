@@ -1,6 +1,6 @@
 # Resource Radar
 
-## UPDATE August 2025: Remote servers have been shut down. Unfortunately this project no longer serves a purpose. 
+### UPDATE August 2025: Remote servers have been shut down. 
 
 ## Overview
 
