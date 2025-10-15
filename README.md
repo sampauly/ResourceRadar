@@ -140,3 +140,4 @@ Once your email is added, Google authentication will verify you, and the app wil
 ## Images 
 <img width="1440" height="732" alt="Screenshot 2025-10-15 at 5 25 25 PM" src="https://github.com/user-attachments/assets/37742827-868e-4878-9737-17ec998f3587" />
 <img width="1440" height="732" alt="Screenshot 2025-10-15 at 5 31 03 PM" src="https://github.com/user-attachments/assets/72ac6f02-77c3-4800-bd31-86486215681a" />
+<img width="1440" height="732" alt="Screenshot 2025-10-15 at 5 39 49 PM" src="https://github.com/user-attachments/assets/3ed27c32-5f7d-4589-9200-fb722e486574" />
