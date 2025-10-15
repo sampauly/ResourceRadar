@@ -1,7 +1,4 @@
-# Resource Radar
-
-### UPDATE August 2025: Remote servers have been shut down. 
-
+## UPDATE OCTOBER 2025: Resource Radar 2.0 in development 
 ## Overview
 
 Resource Radar is a Flask-based web application designed to monitor and visualize real-time metrics for distributed systems. It supports user authentication via Google OAuth, provides role-based access control (RBAC), and includes an admin panel for user management.
@@ -136,3 +133,8 @@ To manually add the first admin user:
    ```
 
 Once your email is added, Google authentication will verify you, and the app will grant you admin access. To add more users, you can use the "Manage Users" link within the application.
+
+## Images 
+<img width="1440" height="732" alt="Screenshot 2025-10-15 at 5 25 25 PM" src="https://github.com/user-attachments/assets/37742827-868e-4878-9737-17ec998f3587" />
+<img width="1440" height="732" alt="Screenshot 2025-10-15 at 5 25 48 PM" src="https://github.com/user-attachments/assets/1b7bbc2d-df81-4549-bb70-0097a0262de0" />
+<img width="1440" height="732" alt="Screenshot 2025-10-15 at 5 31 03 PM" src="https://github.com/user-attachments/assets/72ac6f02-77c3-4800-bd31-86486215681a" />
