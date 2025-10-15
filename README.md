@@ -92,7 +92,7 @@ flask db upgrade
 
 To run the application with Gunicorn:
 ```bash
-gunicorn --workers 1 --bind unix:/run/flask.sock "app()"
+gunicorn --workers 1 --bind unix:/run/flask.sock "app:create_app()"
 ```
 
 For development purposes:
