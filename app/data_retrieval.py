@@ -7,8 +7,8 @@ from . import scheduler
 logger = logging.getLogger(__name__)
 
 servers = [
-    {"name": "server_1", "host": "http://45.79.180.177:19999"},
-    {"name": "server_2", "host": "http://66.228.32.144:19999"}
+    {"name": "server_1", "host": "secret"},
+    {"name": "server_2", "host": "secret"}
 ]
 
 def get_data(host, chart, points=1):
